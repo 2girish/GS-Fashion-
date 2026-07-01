@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 function Login() {
   let [show,setShow] = useState(false)
           let [email,setEmail] = useState("")
-          let [password,setPassword] = useState(" ")
+          let [password,setPassword] = useState("")
           let {serverUrl} = useContext(authDataContext)
           let {adminData , getAdmin} = useContext(adminDataContext)
           let navigate = useNavigate()

@@ -25,44 +25,78 @@ function Registration() {
 
     let navigate = useNavigate()
 
-    const handleSignup = async (e) => {
-        setLoading(true)
-        e.preventDefault()
-        try {
-         const result = await axios.post(serverUrl + '/api/auth/registration',{
-            name,email,password
-         },{withCredentials:true})
-            getCurrentUser()
-            navigate("/")
-            toast.success("User Registration Successful")
-            console.log(result.data)
-            setLoading(false)
+const handleSignup = async (e) => {
+    e.preventDefault();
 
-        } catch (error) {
-            console.log(error)
-            toast.error("User Registration Failed")
+    setLoading(true);
+
+    try {
+        const result = await axios.post(
+            serverUrl + "/api/auth/registration",
+            {
+                name,
+                email,
+                password,
+            },
+            {
+                withCredentials: true,
+            }
+        );
+
+        toast.success("User Registration Successful");
+
+        await getCurrentUser();
+
+        navigate("/");
+    } catch (error) {
+        console.log(error);
+
+        if (error.response?.data?.message) {
+            toast.error(error.response.data.message);
+        } else {
+            toast.error("Server Error");
         }
+    } finally {
+        setLoading(false);
     }
+};
 
     const googleSignup = async () => {
-        try {
-            const response = await signInWithPopup(auth , provider)
-            let user = response.user
-            let name = user.displayName;
-            let email = user.email
+    try {
+        setLoading(true);
 
-            const result = await axios.post(serverUrl + "/api/auth/googlelogin" ,{name , email} , {withCredentials:true})
-            console.log(result.data)
-            getCurrentUser()
-            navigate("/")
-            toast.success("User Registration Successful")
+        const response = await signInWithPopup(auth, provider);
 
-        } catch (error) {
-            console.log(error)
-            toast.error("User Registration Failed")
+        const user = response.user;
+
+        await axios.post(
+            serverUrl + "/api/auth/googlelogin",
+            {
+                name: user.displayName,
+                email: user.email,
+            },
+            {
+                withCredentials: true,
+            }
+        );
+
+        toast.success("Registration Successful");
+
+        await getCurrentUser();
+
+        navigate("/");
+    } catch (error) {
+        console.log(error);
+
+        if (error.response?.data?.message) {
+            toast.error(error.response.data.message);
+        } else {
+            toast.error("Google Registration Failed");
         }
-        
+    } finally {
+        setLoading(false);
     }
+};
   
   return (
     <div className='w-[100vw] h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-[white] flex flex-col items-center justify-start'>
@@ -86,7 +120,7 @@ function Registration() {
             </div>
             <div className='w-[90%] h-[400px] flex flex-col items-center justify-center gap-[15px]  relative'>
                 <input type="text" className='w-[100%] h-[50px] border-[2px] border-[#96969635] backdrop:blur-sm rounded-lg shadow-lg bg-transparent placeholder-[#ffffffc7] px-[20px] font-semibold' placeholder='UserName' required onChange={(e)=>setName(e.target.value)} value={name}/>
-                 <input type="text" className='w-[100%] h-[50px] border-[2px] border-[#96969635] backdrop:blur-sm rounded-lg shadow-lg bg-transparent placeholder-[#ffffffc7] px-[20px] font-semibold' placeholder='Email' required onChange={(e)=>setEmail(e.target.value)} value={email}/>
+                 <input type="email" className='w-[100%] h-[50px] border-[2px] border-[#96969635] backdrop:blur-sm rounded-lg shadow-lg bg-transparent placeholder-[#ffffffc7] px-[20px] font-semibold' placeholder='Email' required onChange={(e)=>setEmail(e.target.value)} value={email}/>
                   <input type={show?"text":"password"} className='w-[100%] h-[50px] border-[2px] border-[#96969635] backdrop:blur-sm rounded-lg shadow-lg bg-transparent placeholder-[#ffffffc7] px-[20px] font-semibold' placeholder='Password' required onChange={(e)=>setPassword(e.target.value)} value={password}/>
                   {!show && <IoEyeOutline className='w-[20px] h-[20px] cursor-pointer absolute right-[5%]' onClick={()=>setShow(prev => !prev)}/>}
                   {show && <IoEye className='w-[20px] h-[20px] cursor-pointer absolute right-[5%]' onClick={()=>setShow(prev => !prev)}/>}

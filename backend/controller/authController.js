@@ -4,49 +4,118 @@ import bcrypt from "bcryptjs"
 import { genToken, genToken1 } from "../config/token.js";
 
 
-export const registration = async (req,res) => {
-  try {
-    const {name , email, password} = req.body;
-    const existUser = await User.findOne({email})
-    if(existUser){
-        return res.status(400).json({message:"User already exist"})
-    }
-    if(!validator.isEmail(email)){
-         return res.status(400).json({message:"Enter valid Email"})
-    }
-    if(password.length < 8){
-        return res.status(400).json({message:"Enter Strong Password"})
-    }
-    let hashPassword = await bcrypt.hash(password,10)
+export const registration = async (req, res) => {
+    try {
+        let { name, email, password } = req.body;
 
-    const user = await User.create({name,email,password:hashPassword})
-    let token = await genToken(user._id)
-    res.cookie("token",token,{
-        httpOnly:true,
-        secure:false,
-        sameSite: "Strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000
-    })
-    return res.status(201).json(user)
-  } catch (error) {
-    console.log("registration error")
-    return res.status(500).json({message:`registration error ${error}`})
-  }
-    
+        // Remove extra spaces
+        name = name?.trim();
+        email = email?.trim().toLowerCase();
+        password = password?.trim();
+
+        // Name Validation
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your name",
+            });
+        }
+
+ // Email Validation
+if (!email || email.trim() === "") {
+    return res.status(400).json({
+        success: false,
+        message: "Please enter your email",
+    });
 }
 
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/;
+
+if (!emailRegex.test(email)) {
+    return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email (example@gmail.com)",
+    });
+}
+
+        // Password Validation
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your password",
+            });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters",
+            });
+        }
+
+        // Check Existing User
+        const existUser = await User.findOne({ email });
+
+        if (existUser) {
+            return res.status(400).json({
+                success: false,
+                message: "Email already registered",
+            });
+        }
+
+        // Encrypt Password
+        const hashPassword = await bcrypt.hash(password, 10);
+
+        // Create User
+        const user = await User.create({
+            name,
+            email,
+            password: hashPassword,
+        });
+
+        // Generate Token
+        const token = await genToken(user._id);
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: false, // change to true in production with HTTPS
+            sameSite: "Strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Registration Successful",
+            user,
+        });
+
+    } catch (error) {
+        console.error("Registration Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+};
 
 export const login = async (req,res) => {
     try {
         let {email,password} = req.body;
         let user = await User.findOne({email}) 
-        if(!user){
-            return res.status(404).json({message:"User is not Found"})
-        }
+       if (!user) {
+    return res.status(404).json({
+        success: false,
+        message: "Email not registered",
+    });
+}
         let isMatch = await bcrypt.compare(password,user.password)
-        if(!isMatch){
-            return res.status(400).json({message:"Incorrect password"})
-        }
+        if (!isMatch) {
+    return res.status(401).json({
+        success: false,
+        message: "Incorrect password",
+    });
+}
         let token = await genToken(user._id)
         res.cookie("token",token,{
         httpOnly:true,
@@ -54,7 +123,11 @@ export const login = async (req,res) => {
         sameSite: "Strict",
         maxAge: 7 * 24 * 60 * 60 * 1000
     })
-    return res.status(201).json(user)
+    return res.status(200).json({
+    success: true,
+    message: "Login Successful",
+    user,
+});
 
     } catch (error) {
          console.log("login error")

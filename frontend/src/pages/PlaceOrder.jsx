@@ -8,6 +8,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Loading from '../component/Loading'
+import AddressForm from "../component/AddressForm";
 
 function PlaceOrder() {
     let [method,setMethod] = useState('cod')
@@ -28,11 +29,7 @@ function PlaceOrder() {
     phone:''
     })
 
-    const onChangeHandler = (e)=>{
-    const name = e.target.name;
-    const value = e.target.value;
-    setFormData(data => ({...data,[name]:value}))
-    }
+
 
     const initPay = (order) =>{
         const options = {
@@ -60,7 +57,83 @@ function PlaceOrder() {
      const onSubmitHandler = async (e) => {
         
     setLoading(true)
-        e.preventDefault()
+        e.preventDefault();
+        // Phone number validation
+// First Name
+if (!formData.firstName.trim()) {
+    toast.error("First Name is required");
+    setLoading(false);
+    return;
+}
+
+// Last Name
+if (!formData.lastName.trim()) {
+    toast.error("Last Name is required");
+    setLoading(false);
+    return;
+}
+
+// Email
+if (!formData.email.trim()) {
+    toast.error("Email is required");
+    setLoading(false);
+    return;
+}
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+if (!emailRegex.test(formData.email)) {
+    toast.error("Please enter a valid email");
+    setLoading(false);
+    return;
+}
+
+// Street
+if (!formData.street.trim()) {
+    toast.error("Street is required");
+    setLoading(false);
+    return;
+}
+
+// Country
+if (!formData.country) {
+    toast.error("Please select your country");
+    setLoading(false);
+    return;
+}
+
+// State
+if (!formData.state) {
+    toast.error("Please select your state");
+    setLoading(false);
+    return;
+}
+
+// City
+if (!formData.city.trim()) {
+    toast.error("City is required");
+    setLoading(false);
+    return;
+}
+
+// Pincode
+const pinRegex = /^[1-9][0-9]{5}$/;
+
+if (!pinRegex.test(formData.pinCode)) {
+    toast.error("Enter a valid 6-digit pincode");
+    setLoading(false);
+    return;
+}
+
+// Phone
+const phoneRegex = /^[6-9]\d{9}$/;
+
+if (!phoneRegex.test(formData.phone)) {
+    toast.error("Enter a valid 10-digit mobile number");
+    setLoading(false);
+    return;
+}
+
     try {
       let orderItems = []
       for(const items in cartItem){
@@ -108,6 +181,17 @@ function PlaceOrder() {
         }
 
         break;
+        case "razorpay": {
+    const resultRazorpay = await axios.post(
+        serverUrl + "/api/order/razorpay",
+        orderData,
+        { withCredentials: true }
+    );
+
+    // your code
+
+    break;
+}
 
 
 
@@ -122,7 +206,7 @@ function PlaceOrder() {
       console.log(error)
     
     }
-     }
+  }
   return (
     <div className='w-[100vw] min-h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] flex items-center justify-center flex-col md:flex-row gap-[50px]  relative'>
         <div className='lg:w-[50%] w-[100%] h-[100%] flex items-center justify-center  lg:mt-[0px] mt-[90px] '>
@@ -130,33 +214,14 @@ function PlaceOrder() {
         <div className='py-[10px]'>
         <Title text1={'DELIVERY'} text2={'INFORMATION'}/>
         </div>
-        <div className='w-[100%] h-[70px] flex items-center justify-between px-[10px]'>
+        <AddressForm
 
-         <input type="text" placeholder='First name' className='w-[48%] h-[50px] rounded-md bg-slate-700 placeholder:text-[white] text-[18px] px-[20px] shadow-sm shadow-[#343434]'required  onChange={onChangeHandler} name='firstName' value={formData.firstName}/>
+formData={formData}
 
-          <input type="text" placeholder='Last name' className='w-[48%] h-[50px] rounded-md shadow-sm shadow-[#343434] bg-slate-700 placeholder:text-[white] text-[18px] px-[20px]' required onChange={onChangeHandler} name='lastName' value={formData.lastName} />
-        </div>
+setFormData={setFormData}
 
-        <div className='w-[100%] h-[70px] flex items-center justify-between px-[10px]'>
-          <input type="email" placeholder='Email address' className='w-[100%] h-[50px] rounded-md shadow-sm shadow-[#343434] bg-slate-700 placeholder:text-[white] text-[18px] px-[20px]'required onChange={onChangeHandler} name='email' value={formData.email} />
-         
-        </div>
-        <div className='w-[100%] h-[70px] flex items-center justify-between px-[10px]'>
-          <input type="text" placeholder='Street' className='w-[100%] h-[50px] rounded-md bg-slate-700 shadow-sm shadow-[#343434] placeholder:text-[white] text-[18px] px-[20px]' required onChange={onChangeHandler} name='street' value={formData.street} />
-         
-        </div>
-        <div className='w-[100%] h-[70px] flex items-center justify-between px-[10px]'>
-          <input type="text" placeholder='City' className='w-[48%] h-[50px] rounded-md bg-slate-700 shadow-sm shadow-[#343434] placeholder:text-[white] text-[18px] px-[20px]' required onChange={onChangeHandler} name='city' value={formData.city} />
-          <input type="text" placeholder='State' className='w-[48%] h-[50px] rounded-md bg-slate-700 shadow-sm shadow-[#343434] placeholder:text-[white] text-[18px] px-[20px]' required onChange={onChangeHandler} name='state' value={formData.state} />
-        </div>
-        <div className='w-[100%] h-[70px] flex items-center justify-between px-[10px]'>
-          <input type="text" placeholder='Pincode' className='w-[48%] h-[50px] rounded-md bg-slate-700 shadow-sm shadow-[#343434] placeholder:text-[white] text-[18px] px-[20px]' required onChange={onChangeHandler} name='pinCode' value={formData.pinCode} />
-          <input type="text" placeholder='Country' className='w-[48%] h-[50px] rounded-md bg-slate-700 shadow-sm shadow-[#343434] placeholder:text-[white] text-[18px] px-[20px]' required onChange={onChangeHandler} name='country' value={formData.country} />
-        </div>
-         <div className='w-[100%] h-[70px] flex items-center justify-between px-[10px]'>
-          <input type="text" placeholder='Phone' className='w-[100%] h-[50px] rounded-md bg-slate-700 shadow-sm shadow-[#343434] placeholder:text-[white] text-[18px] px-[20px]' required onChange={onChangeHandler} name='phone' value={formData.phone} />
-         
-        </div>
+/>
+
         <div>
           <button type='submit' className='text-[18px] active:bg-slate-500 cursor-pointer bg-[#3bcee848] py-[10px] px-[50px] rounded-2xl text-white flex items-center justify-center gap-[20px] absolute lg:right-[20%] bottom-[10%] right-[35%] border-[1px] border-[#80808049] ml-[30px] mt-[20px]' >{loading? <Loading/> : "PLACE ORDER"}</button>
          </div> 
