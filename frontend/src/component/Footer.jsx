@@ -1,51 +1,57 @@
 import React from 'react'
 import logo from "../assets/gs1.jpeg"
+
 function Footer() {
   return (
-    <div className='w-[100%] md:h-[36vh] h-[21vh] mb-[77px] md:mb-[0px]'>
-        <div className='w-[100%] md:h-[30vh] h-[15vh]  md:mb-[0px] bg-[#dbfcfcec] flex items-center justify-center md:px-[50px] px-[5px]'>
-            <div className='md:w-[30%] w-[35%] h-[100%] flex items-start justify-center flex-col gap-[5px]  '>
-                <div className='flex items-start justify-start gap-[5px] mt-[10px] md:mt-[40px]'>
-                    <img src={logo} alt=""  className='md:w-[40px] md:h-[40px] w-[30px] h-[30px]'/>
-                    <p className='text-[19px] md:text-[20px] text-[black] '><b>𝐺𝐒 Fashion</b></p>
-            
-                </div>
-                <p className='text-[15px] text-[#1e2223] hidden md:block'>GS Fashion  is your all-in-one online shopping destination, offering top-quality products, unbeatable deals, and fast delivery—all backed by trusted service designed to make your life easier every day.</p>
-                    <p className='text-[15px] text-[#1e2223] flex md:hidden'>Fast. Easy. Reliable. in GS Fashion</p>
+    <footer className="w-full bg-[#dbfcfcec] mt-10">
+      <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between gap-10">
 
-    
-            </div>
-            <div className='md:w-[25%] w-[30%] h-[100%] flex items-center justify-center flex-col text-center'>
-                    <div className='flex items-center justify-center gap-[5px] mt-[10px] md:mt-[40px]'>
-                        <p className='text-[19px] md:text-[20px] text-[#1e2223] font-sans '>COMPANY</p>
+        {/* Logo */}
+        <div className="md:w-1/3">
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="GS Fashion" className="w-10 h-10" />
+            <h2 className="text-xl font-bold">𝐺𝐒 Fashion</h2>
+          </div>
 
-                    </div>
-                    <ul>
-                         <li className='text-[15px] text-[#1e2223] hidden md:block cursor-pointer'>Home</li>
-                        <li className='text-[15px] text-[#1e2223] cursor-pointer '>About us</li>
-                        <li className='text-[15px] text-[#1e2223] hidden md:block cursor-pointer'>Delivery</li>
-                        <li className='text-[15px] text-[#1e2223] cursor-pointer'>Privacy Policy</li>
-                    </ul>
-                </div>
+          <p className="mt-4 text-gray-700 hidden md:block">
+            GS Fashion is your all-in-one online shopping destination,
+            offering top-quality products, unbeatable deals, and fast
+            delivery backed by trusted service.
+          </p>
 
-                <div className='md:w-[25%] w-[40%]  h-[100%] flex items-center justify-center flex-col text-center '>
-                     <div className='flex items-center justify-center gap-[5px] mt-[10px] md:mt-[40px]'>
-                        <p className='text-[19px] md:text-[20px] text-[#1e2223] font-sans '>GET IN TOUCH</p>
-
-                    </div>
-                     <ul>
-                         <li className='text-[15px] text-[#1e2223] '>+91-9632709277</li>
-                        <li className='text-[15px] text-[#1e2223] '>sudeep02@gmail.com</li>
-                        <li className='text-[15px] text-[#1e2223] hidden md:block'>+91-8971800152</li>
-                        <li className='text-[15px] text-[#1e2223] hidden md:block'>girishky78@gmail.com</li>
-                    </ul>
-                </div>
-
+          <p className="mt-3 text-gray-700 md:hidden">
+            Fast. Easy. Reliable. GS Fashion.
+          </p>
         </div>
-        <div className='w-[100%] h-[1px] bg-slate-400'></div>
-        <div className='w-[100%] h-[5vh] bg-[#dbfcfcec] flex items-center justify-center'>Copyright 2025@GS Fashion.com-All Rights Reserved</div>
-      
-    </div>
+
+        {/* Company */}
+        <div className="md:w-1/3 text-center">
+          <h2 className="text-xl font-semibold mb-4">COMPANY</h2>
+
+          <ul className="space-y-2 text-gray-700">
+            <li>Home</li>
+            <li>About Us</li>
+            <li>Delivery</li>
+            <li>Privacy Policy</li>
+          </ul>
+        </div>
+
+        {/* Contact */}
+        <div className="md:w-1/3 text-center">
+          <h2 className="text-xl font-semibold mb-4">GET IN TOUCH</h2>
+
+          <ul className="space-y-2 text-gray-700">
+            <li>+91 8971800152</li>
+            <li>girishky78@gmail.com</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div className="border-t border-gray-400 py-4 text-center text-sm">
+        © 2025 GS Fashion. All Rights Reserved.
+      </div>
+    </footer>
   )
 }
 
