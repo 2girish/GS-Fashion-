@@ -3,7 +3,7 @@ import Title from '../component/Title'
 import CartTotal from '../component/CartTotal'
 import razorpay from '../assets/Razorpay.jpg'
 import { shopDataContext } from '../context/ShopContext'
-import { authDataContext } from '../context/authContext'
+import { authDataContext } from '../context/AuthContext'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -181,21 +181,6 @@ if (!phoneRegex.test(formData.phone)) {
         }
 
         break;
-        case "razorpay": {
-    const resultRazorpay = await axios.post(
-        serverUrl + "/api/order/razorpay",
-        orderData,
-        { withCredentials: true }
-    );
-
-    // your code
-
-    break;
-}
-
-
-
-
         default:
         break;
 
