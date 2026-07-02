@@ -20,7 +20,8 @@ app.use(cookieParser())
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://gs-fashion-five.vercel.app"
+    "https://gs-fashion-five.vercel.app",
+    "https://gs-fashion-ez54-iota.vercel.app"
   ],
   credentials: true,
 }));
