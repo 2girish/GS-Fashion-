@@ -6,7 +6,7 @@ import { IoEyeOutline, IoEye } from "react-icons/io5";
 import { authDataContext } from "../context/AuthContext";
 import { userDataContext } from "../context/UserContext";
 import axios from "axios";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect } from "firebase/auth";
 import { auth, provider } from "../../utils/Firebase";
 import Loading from "../component/Loading";
 import { toast } from "react-toastify";
@@ -57,37 +57,42 @@ function Login() {
     }
   };
 
-  const googlelogin = async () => {
-    try {
-      setLoading(true);
+ const googlelogin = async () => {
+  try {
+    setLoading(true);
 
-      const response = await signInWithPopup(auth, provider);
+    let response;
 
-      const user = response.user;
-
-      await axios.post(
-        `${serverUrl}/api/auth/googlelogin`,
-        {
-          name: user.displayName,
-          email: user.email,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-
-      toast.success("Google Login Successful");
-
-      await getCurrentUser();
-
-      navigate("/");
-    } catch (error) {
-      console.log(error);
-      toast.error("Google Login Failed");
-    } finally {
-      setLoading(false);
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      await signInWithRedirect(auth, provider);
+      return;
+    } else {
+      response = await signInWithPopup(auth, provider);
     }
-  };
+
+    const user = response.user;
+
+    await axios.post(
+      `${serverUrl}/api/auth/googlelogin`,
+      {
+        name: user.displayName,
+        email: user.email,
+      },
+      {
+        withCredentials: true,
+      }
+    );
+
+    toast.success("Google Login Successful");
+    await getCurrentUser();
+    navigate("/");
+  } catch (error) {
+    console.error(error);
+    toast.error("Google Login Failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="w-[100vw] h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-white flex flex-col items-center justify-start">
