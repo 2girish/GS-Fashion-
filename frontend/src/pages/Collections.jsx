@@ -77,10 +77,17 @@ function Collections() {
     useEffect(()=>{
     setFilterProduct(products)
     },[products])
+useEffect(() => {
+    let productCopy = products.slice();
 
-    useEffect(()=>{
-        applyFilter()
-    },[category,subCategory,search ,showSearch])
+    if (showSearch && search) {
+        productCopy = productCopy.filter(item =>
+            item.name.toLowerCase().includes(search.toLowerCase())
+        );
+    }
+
+    setFilterProduct(productCopy);
+}, [search, showSearch, products]);
 
 
 
@@ -162,6 +169,26 @@ return (
 
     <div className="flex mt-8">
 
+        <div className="flex gap-3 mt-5">
+  <button
+    onClick={applyFilter}
+    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
+  >
+    Apply Filters
+  </button>
+
+  <button
+    onClick={() => {
+      setCaterory([]);
+      setSubCaterory([]);
+      setFilterProduct(products);
+    }}
+    className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold"
+  >
+    Clear
+  </button>
+</div>
+
       {/* Desktop Filter */}
       <div className="hidden md:block w-[260px] px-5 text-[#aaf5fa]">
 
@@ -204,6 +231,27 @@ return (
         </div>
 
       </div>
+      <div className="mt-6 flex flex-col gap-3">
+
+  <button
+    onClick={applyFilter}
+    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
+  >
+    Apply Filters
+  </button>
+
+  <button
+    onClick={() => {
+      setCaterory([]);
+      setSubCaterory([]);
+      setFilterProduct(products);
+    }}
+    className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold"
+  >
+    Clear Filters
+  </button>
+
+</div>
 
       {/* Products */}
       <div className="flex-1 px-4">
