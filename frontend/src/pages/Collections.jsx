@@ -90,19 +90,15 @@ useEffect(() => {
 }, [search, showSearch, products]);
 
 
-
-
-
-
 return (
   <div className="w-full min-h-screen bg-gradient-to-l from-[#141414] to-[#0c2025] pt-[80px] pb-[80px]">
 
     {/* Header */}
-    <div className="w-full px-4 md:px-8 flex flex-row items-center justify-between">
+    <div className="w-full px-4 md:px-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <Title text1={"ALL"} text2={"COLLECTIONS"} />
 
       <select
-        className="bg-slate-600 text-white rounded-lg border-2 border-gray-500 hover:border-[#46d1f7] px-3 py-2 text-sm md:text-base"
+        className="bg-slate-600 text-white rounded-lg border-2 border-gray-500 hover:border-[#46d1f7] px-3 py-2 w-full md:w-[220px]"
         onChange={(e) => SetSortType(e.target.value)}
       >
         <option value="relavent">Sort By: Relevant</option>
@@ -115,99 +111,89 @@ return (
     <div className="md:hidden px-4 mt-5">
       <button
         onClick={() => setShowFilter(!showFilter)}
-        className="w-full bg-slate-700 text-white rounded-lg py-3 flex justify-between items-center px-4"
+        className="w-full bg-slate-700 text-white rounded-lg py-3 px-4 flex justify-between items-center"
       >
         <span className="font-semibold">FILTERS</span>
-
         {showFilter ? <FaChevronDown /> : <FaChevronRight />}
       </button>
 
       {showFilter && (
-        <div className="mt-4 space-y-4">
+        <div className="bg-slate-700 rounded-lg p-4 mt-4 space-y-5 text-white">
 
-          <div className="border rounded-lg bg-slate-600 p-4 text-white">
+          <div>
             <p className="font-semibold mb-3">CATEGORIES</p>
 
             <label className="flex gap-2">
-              <input type="checkbox" value="Men" onChange={toggleCategory} />
-              Men
+              <input type="checkbox" value="Men" onChange={toggleCategory} /> Men
             </label>
 
             <label className="flex gap-2 mt-2">
-              <input type="checkbox" value="Women" onChange={toggleCategory} />
-              Women
+              <input type="checkbox" value="Women" onChange={toggleCategory} /> Women
             </label>
 
             <label className="flex gap-2 mt-2">
-              <input type="checkbox" value="Kids" onChange={toggleCategory} />
-              Kids
+              <input type="checkbox" value="Kids" onChange={toggleCategory} /> Kids
             </label>
           </div>
 
-          <div className="border rounded-lg bg-slate-600 p-4 text-white">
+          <div>
             <p className="font-semibold mb-3">SUB CATEGORIES</p>
 
             <label className="flex gap-2">
-              <input type="checkbox" value="TopWear" onChange={toggleSubCategory} />
-              TopWear
+              <input type="checkbox" value="TopWear" onChange={toggleSubCategory} /> TopWear
             </label>
 
             <label className="flex gap-2 mt-2">
-              <input type="checkbox" value="BottomWear" onChange={toggleSubCategory} />
-              BottomWear
+              <input type="checkbox" value="BottomWear" onChange={toggleSubCategory} /> BottomWear
             </label>
 
             <label className="flex gap-2 mt-2">
-              <input type="checkbox" value="WinterWear" onChange={toggleSubCategory} />
-              WinterWear
+              <input type="checkbox" value="WinterWear" onChange={toggleSubCategory} /> WinterWear
             </label>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={applyFilter}
+              className="bg-blue-600 hover:bg-blue-700 py-2 rounded-lg"
+            >
+              Apply
+            </button>
+
+            <button
+              onClick={() => {
+                setCaterory([]);
+                setSubCaterory([]);
+                setFilterProduct(products);
+              }}
+              className="bg-red-600 hover:bg-red-700 py-2 rounded-lg"
+            >
+              Clear
+            </button>
           </div>
 
         </div>
       )}
     </div>
 
-    <div className="flex mt-8">
-
-        <div className="flex gap-3 mt-5">
-  <button
-    onClick={applyFilter}
-    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
-  >
-    Apply Filters
-  </button>
-
-  <button
-    onClick={() => {
-      setCaterory([]);
-      setSubCaterory([]);
-      setFilterProduct(products);
-    }}
-    className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold"
-  >
-    Clear
-  </button>
-</div>
+    <div className="flex flex-col md:flex-row gap-6 mt-8 px-4">
 
       {/* Desktop Filter */}
-      <div className="hidden md:block w-[260px] px-5 text-[#aaf5fa]">
+      <div className="hidden md:block w-[260px] shrink-0 text-[#aaf5fa]">
 
         <div className="border rounded-lg bg-slate-700 p-5">
           <p className="text-xl mb-4">CATEGORIES</p>
 
           <label className="flex gap-2">
-            <input type="checkbox" value="Men" onChange={toggleCategory} />
-            Men
+            <input type="checkbox" value="Men" onChange={toggleCategory} /> Men
           </label>
 
           <label className="flex gap-2 mt-3">
-            <input type="checkbox" value="Women" onChange={toggleCategory} />
-            Women
+            <input type="checkbox" value="Women" onChange={toggleCategory} /> Women
           </label>
 
           <label className="flex gap-2 mt-3">
-            <input type="checkbox" value="Kids" onChange={toggleCategory} />
-            Kids
+            <input type="checkbox" value="Kids" onChange={toggleCategory} /> Kids
           </label>
         </div>
 
@@ -215,48 +201,44 @@ return (
           <p className="text-xl mb-4">SUB CATEGORIES</p>
 
           <label className="flex gap-2">
-            <input type="checkbox" value="TopWear" onChange={toggleSubCategory} />
-            TopWear
+            <input type="checkbox" value="TopWear" onChange={toggleSubCategory} /> TopWear
           </label>
 
           <label className="flex gap-2 mt-3">
-            <input type="checkbox" value="BottomWear" onChange={toggleSubCategory} />
-            BottomWear
+            <input type="checkbox" value="BottomWear" onChange={toggleSubCategory} /> BottomWear
           </label>
 
           <label className="flex gap-2 mt-3">
-            <input type="checkbox" value="WinterWear" onChange={toggleSubCategory} />
-            WinterWear
+            <input type="checkbox" value="WinterWear" onChange={toggleSubCategory} /> WinterWear
           </label>
+
+          <div className="flex flex-col gap-3 mt-6">
+            <button
+              onClick={applyFilter}
+              className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+            >
+              Apply Filters
+            </button>
+
+            <button
+              onClick={() => {
+                setCaterory([]);
+                setSubCaterory([]);
+                setFilterProduct(products);
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg"
+            >
+              Clear Filters
+            </button>
+          </div>
+
         </div>
-
       </div>
-      <div className="mt-6 flex flex-col gap-3">
-
-  <button
-    onClick={applyFilter}
-    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
-  >
-    Apply Filters
-  </button>
-
-  <button
-    onClick={() => {
-      setCaterory([]);
-      setSubCaterory([]);
-      setFilterProduct(products);
-    }}
-    className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold"
-  >
-    Clear Filters
-  </button>
-
-</div>
 
       {/* Products */}
-      <div className="flex-1 px-4">
+      <div className="flex-1">
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 place-items-center">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
           {filterProduct.map((item, index) => (
             <Card
