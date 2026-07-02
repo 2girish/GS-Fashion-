@@ -172,17 +172,20 @@ if (!phoneRegex.test(formData.phone)) {
 
         break;
 
-        case 'razorpay':
-        const resultRazorpay = await axios.post(serverUrl + "/api/order/razorpay" , orderData , {withCredentials:true})
-        if(resultRazorpay.data){
-          initPay(resultRazorpay.data)
-           toast.success("Order Placed")
-           setLoading(false)
-        }
+        case "razorpay":
+    const resultRazorpay = await axios.post(
+        serverUrl + "/api/order/razorpay",
+        orderData,
+        { withCredentials: true }
+    );
 
-        break;
-        default:
-        break;
+    if (resultRazorpay.data) {
+        initPay(resultRazorpay.data);
+        toast.success("Order Placed");
+        setLoading(false);
+    }
+
+    break;
 
       }
     
