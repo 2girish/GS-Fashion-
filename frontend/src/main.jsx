@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';   // <-- Add this
 
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
-import AuthContext from './context/authContext.jsx'
+import AuthContext from './context/AuthContext.jsx'
 import UserContext from './context/UserContext.jsx'
 import ShopContext from './context/ShopContext.jsx'
 

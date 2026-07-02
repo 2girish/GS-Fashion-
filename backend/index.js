@@ -13,13 +13,19 @@ import orderRoutes from './routes/orderRoutes.js'
 let port = process.env.PORT || 6000
 
 let app = express()
+app.set("trust proxy", 1);
 
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174"
+    ],
+    credentials: true,
+  })
+);
 
 app.use("/api/auth",authRoutes)
 app.use("/api/user",userRoutes)
@@ -33,9 +39,10 @@ app.get("/", (req, res) => {
 
 
 
-app.listen(port,()=>{
-    console.log("Hello From Server")
-    connectDb()
-})
+connectDb();
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
 
 
