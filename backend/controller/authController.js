@@ -75,13 +75,12 @@ if (!emailRegex.test(email)) {
 
         // Generate Token
         const token = await genToken(user._id);
-
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: false, // change to true in production with HTTPS
-            sameSite: "Strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+});
 
         return res.status(201).json({
             success: true,
@@ -117,12 +116,12 @@ export const login = async (req,res) => {
     });
 }
         let token = await genToken(user._id)
-        res.cookie("token",token,{
-        httpOnly:true,
-        secure:false,
-        sameSite: "Strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000
-    })
+       res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+});
     return res.status(200).json({
     success: true,
     message: "Login Successful",
@@ -138,7 +137,11 @@ export const login = async (req,res) => {
 }
 export const logOut = async (req,res) => {
 try {
-    res.clearCookie("token")
+   res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+});
     return res.status(200).json({message:"logOut successful"})
 } catch (error) {
     console.log("logOut error")
@@ -159,12 +162,12 @@ export const googleLogin = async (req,res) => {
         }
        
         let token = await genToken(user._id)
-        res.cookie("token",token,{
-        httpOnly:true,
-        secure:false,
-        sameSite: "Strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000
-    })
+   res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+});
     return res.status(200).json(user)
 
     } catch (error) {
@@ -180,12 +183,12 @@ export const adminLogin = async (req,res) => {
         let {email , password} = req.body
         if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
         let token = await genToken1(email)
-        res.cookie("token",token,{
-        httpOnly:true,
-        secure:false,
-        sameSite: "Strict",
-        maxAge: 1 * 24 * 60 * 60 * 1000
-    })
+     res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    maxAge: 1 * 24 * 60 * 60 * 1000,
+});
     return res.status(200).json(token)
         }
         return res.status(400).json({message:"Invaild creadintials"})
