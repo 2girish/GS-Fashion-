@@ -1,136 +1,335 @@
-import React from 'react'
-import Logo from "../assets/gs1.jpeg"
-import { useNavigate } from 'react-router-dom'
-import google from '../assets/google.png'
-import { IoEyeOutline } from "react-icons/io5";
-import { IoEye } from "react-icons/io5";
-import { useState } from 'react';
-import { useContext } from 'react';
-import { authDataContext } from '../context/AuthContext';
-import axios from 'axios'
-import { signInWithPopup } from 'firebase/auth';
-import { auth, provider } from '../../utils/Firebase';
-import { userDataContext } from '../context/UserContext';
-import { toast } from 'react-toastify';
-import Loading from '../component/Loading';
+import React, { useContext, useState, useEffect } from "react";
+import Logo from "../assets/gs1.jpeg";
+import google from "../assets/google.png";
+import { useNavigate } from "react-router-dom";
+import { IoEyeOutline, IoEye } from "react-icons/io5";
+import { authDataContext } from "../context/AuthContext";
+import { userDataContext } from "../context/UserContext";
+import axios from "axios";
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../../utils/Firebase";
+import { toast } from "react-toastify";
+import Loading from "../component/Loading";
 
 function Registration() {
-    let [show,setShow] = useState(false)
-    let {serverUrl} = useContext(authDataContext)
-    let [name,setName] = useState("")
-    let [email,setEmail] = useState("")
-    let [password,setPassword] = useState("")
-    let {userdata , getCurrentUser} = useContext(userDataContext)
-    let [loading,setLoading] = useState(false)
+  const navigate = useNavigate();
 
-    let navigate = useNavigate()
+  const { serverUrl } = useContext(authDataContext);
+  const { getCurrentUser } = useContext(userDataContext);
 
-const handleSignup = async (e) => {
+  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [otp, setOtp] = useState("");
+
+  const [otpSent, setOtpSent] = useState(false);
+
+  const [timer, setTimer] = useState(60);
+
+  const [sendingOtp, setSendingOtp] = useState(false);
+
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+
+  useEffect(() => {
+    let interval;
+
+    if (otpSent && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [otpSent, timer]);
+
+  const sendOTP = async () => {
+    if (!name || !email || !password) {
+      return toast.error("Please fill all fields.");
+    }
+
+    try {
+      setSendingOtp(true);
+
+      const result = await axios.post(
+        `${serverUrl}/api/auth/sendotp`,
+        {
+          name,
+          email,
+          password,
+        }
+      );
+
+      toast.success(result.data.message);
+
+      setOtpSent(true);
+
+      setTimer(60);
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        error.response?.data?.message || "Failed to send OTP."
+      );
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const verifyOTP = async (e) => {
     e.preventDefault();
 
-    setLoading(true);
+    if (!otp) {
+      return toast.error("Enter OTP");
+    }
 
     try {
-        const result = await axios.post(
-            serverUrl + "/api/auth/registration",
-            {
-                name,
-                email,
-                password,
-            },
-            {
-                withCredentials: true,
-            }
-        );
+      setVerifyingOtp(true);
 
-        toast.success("User Registration Successful");
-
-        await getCurrentUser();
-
-        navigate("/");
-    } catch (error) {
-        console.log(error);
-
-        if (error.response?.data?.message) {
-            toast.error(error.response.data.message);
-        } else {
-            toast.error("Server Error");
+      const result = await axios.post(
+        `${serverUrl}/api/auth/verifyotp`,
+        {
+          email,
+          otp,
+        },
+        {
+          withCredentials: true,
         }
-    } finally {
-        setLoading(false);
-    }
-};
+      );
 
-    const googleSignup = async () => {
+      toast.success(result.data.message);
+
+      await getCurrentUser();
+
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        error.response?.data?.message ||
+          "OTP Verification Failed"
+      );
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
+  const resendOTP = async () => {
+    if (timer > 0) return;
+
+    sendOTP();
+  };
+
+  const googleSignup = async () => {
     try {
-        setLoading(true);
+      setLoading(true);
 
-        const response = await signInWithPopup(auth, provider);
+      const response = await signInWithPopup(auth, provider);
 
-        const user = response.user;
+      const user = response.user;
 
-        await axios.post(
-            serverUrl + "/api/auth/googlelogin",
-            {
-                name: user.displayName,
-                email: user.email,
-            },
-            {
-                withCredentials: true,
-            }
-        );
-
-        toast.success("Registration Successful");
-
-        await getCurrentUser();
-
-        navigate("/");
-    } catch (error) {
-        console.log(error);
-
-        if (error.response?.data?.message) {
-            toast.error(error.response.data.message);
-        } else {
-            toast.error("Google Registration Failed");
+      await axios.post(
+        `${serverUrl}/api/auth/googlelogin`,
+        {
+          name: user.displayName,
+          email: user.email,
+        },
+        {
+          withCredentials: true,
         }
+      );
+
+      toast.success("Registration Successful");
+
+      await getCurrentUser();
+
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        error.response?.data?.message ||
+          "Google Registration Failed"
+      );
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
   
   return (
-    <div className='w-[100vw] h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-[white] flex flex-col items-center justify-start'>
-    <div className='w-[100%] h-[80px] flex items-center justify-start px-[30px] gap-[10px] cursor-pointer' onClick={()=>navigate("/")}>
-    <img className='w-[40px]' src={Logo} alt="" />
-    <h1 className='text-[22px] font-sans '>GS Fashion</h1>
+  <div className="w-full min-h-screen bg-gradient-to-l from-[#141414] to-[#0c2025] flex flex-col items-center text-white py-6 px-4">
+
+    {/* Logo */}
+    <div
+      className="w-full max-w-5xl flex items-center gap-3 cursor-pointer"
+      onClick={() => navigate("/")}
+    >
+      <img src={Logo} className="w-12 h-12 rounded-full" alt="" />
+      <h1 className="text-2xl font-bold">GS Fashion</h1>
     </div>
 
-    <div className='w-[100%] h-[100px] flex items-center justify-center flex-col gap-[10px]'>
-        <span className='text-[25px] font-semibold'>Registration Page</span>
-        <span className='text-[16px]'>Welcome to GS Fashion, Place your order</span>
+    {/* Heading */}
+    <div className="text-center mt-6">
+      <h2 className="text-3xl font-bold">Create Account</h2>
+      <p className="text-gray-300 mt-2">
+        Welcome to GS Fashion. Register to continue shopping.
+      </p>
+    </div>
+
+    {/* Card */}
+    <div className="w-full max-w-xl mt-8 bg-[#00000030] backdrop-blur-lg border border-gray-700 rounded-2xl shadow-2xl p-6">
+
+      {/* Google Signup */}
+      <button
+        onClick={googleSignup}
+        disabled={loading}
+        className="w-full h-12 rounded-lg bg-[#42656cae] hover:bg-[#517782] flex items-center justify-center gap-3 font-semibold transition"
+      >
+        <img src={google} className="w-5" alt="" />
+        {loading ? <Loading /> : "Continue with Google"}
+      </button>
+
+      <div className="flex items-center gap-3 my-6">
+        <div className="flex-1 h-[1px] bg-gray-600"></div>
+        <span className="text-gray-300">OR</span>
+        <div className="flex-1 h-[1px] bg-gray-600"></div>
+      </div>
+
+      <form onSubmit={verifyOTP} className="space-y-4">
+
+        <input
+          type="text"
+          placeholder="Username"
+          value={name}
+          onChange={(e)=>setName(e.target.value)}
+          className="w-full h-12 rounded-lg bg-transparent border-2 border-gray-600 px-4 outline-none focus:border-cyan-400"
+        />
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e)=>setEmail(e.target.value)}
+          className="w-full h-12 rounded-lg bg-transparent border-2 border-gray-600 px-4 outline-none focus:border-cyan-400"
+        />
+
+        <div className="relative">
+
+          <input
+            type={show ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e)=>setPassword(e.target.value)}
+            className="w-full h-12 rounded-lg bg-transparent border-2 border-gray-600 px-4 outline-none focus:border-cyan-400"
+          />
+
+          {
+            show ?
+
+            <IoEye
+              onClick={()=>setShow(false)}
+              className="absolute right-4 top-3 text-2xl cursor-pointer"
+            />
+
+            :
+
+            <IoEyeOutline
+              onClick={()=>setShow(true)}
+              className="absolute right-4 top-3 text-2xl cursor-pointer"
+            />
+          }
+
+        </div>
+
+        {/* Send OTP */}
+
+        {
+          !otpSent &&
+
+          <button
+            type="button"
+            onClick={sendOTP}
+            disabled={sendingOtp}
+            className="w-full h-12 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold"
+          >
+            {
+              sendingOtp ? <Loading /> : "Send OTP"
+            }
+          </button>
+        }
+
+        {/* OTP */}
+
+        {
+          otpSent &&
+
+          <>
+
+            <input
+              type="text"
+              maxLength={6}
+              placeholder="Enter 6 Digit OTP"
+              value={otp}
+              onChange={(e)=>setOtp(e.target.value)}
+              className="w-full h-12 rounded-lg bg-transparent border-2 border-yellow-500 px-4 text-center tracking-[8px] text-xl"
+            />
+
+            <div className="flex justify-between text-sm">
+
+              <span className="text-yellow-300">
+
+                OTP expires in {timer}s
+
+              </span>
+
+              {
+                timer===0 &&
+
+                <button
+                  type="button"
+                  onClick={resendOTP}
+                  className="text-cyan-400 font-semibold"
+                >
+                  Resend OTP
+                </button>
+              }
+
+            </div>
+
+            <button
+              type="submit"
+              disabled={verifyingOtp}
+              className="w-full h-12 rounded-lg bg-green-600 hover:bg-green-700 font-semibold"
+            >
+              {
+                verifyingOtp ? <Loading/> : "Verify & Create Account"
+              }
+            </button>
+
+          </>
+
+        }
+
+      </form>
+
+      <p className="mt-6 text-center">
+        Already have an account?
+        <span
+          onClick={()=>navigate("/login")}
+          className="ml-2 text-cyan-400 cursor-pointer font-semibold"
+        >
+          Login
+        </span>
+      </p>
 
     </div>
-    <div className='max-w-[600px] w-[90%] h-[500px] bg-[#00000025] border-[1px] border-[#96969635] backdrop:blur-2xl rounded-lg shadow-lg flex items-center justify-center '>
-        <form action="" onSubmit={handleSignup} className='w-[90%] h-[90%] flex flex-col items-center justify-start gap-[20px]'>
-            <div className='w-[90%] h-[50px] bg-[#42656cae] rounded-lg flex items-center justify-center gap-[10px] py-[20px] cursor-pointer' onClick={googleSignup} >
-                <img src={google}  alt="" className='w-[20px]'/> Registration with Google
-            </div>
-            <div className='w-[100%] h-[20px] flex items-center justify-center gap-[10px]'>
-             <div className='w-[40%] h-[1px] bg-[#96969635]'></div> OR <div className='w-[40%] h-[1px] bg-[#96969635]'></div>
-            </div>
-            <div className='w-[90%] h-[400px] flex flex-col items-center justify-center gap-[15px]  relative'>
-                <input type="text" className='w-[100%] h-[50px] border-[2px] border-[#96969635] backdrop:blur-sm rounded-lg shadow-lg bg-transparent placeholder-[#ffffffc7] px-[20px] font-semibold' placeholder='UserName' required onChange={(e)=>setName(e.target.value)} value={name}/>
-                 <input type="email" className='w-[100%] h-[50px] border-[2px] border-[#96969635] backdrop:blur-sm rounded-lg shadow-lg bg-transparent placeholder-[#ffffffc7] px-[20px] font-semibold' placeholder='Email' required onChange={(e)=>setEmail(e.target.value)} value={email}/>
-                  <input type={show?"text":"password"} className='w-[100%] h-[50px] border-[2px] border-[#96969635] backdrop:blur-sm rounded-lg shadow-lg bg-transparent placeholder-[#ffffffc7] px-[20px] font-semibold' placeholder='Password' required onChange={(e)=>setPassword(e.target.value)} value={password}/>
-                  {!show && <IoEyeOutline className='w-[20px] h-[20px] cursor-pointer absolute right-[5%]' onClick={()=>setShow(prev => !prev)}/>}
-                  {show && <IoEye className='w-[20px] h-[20px] cursor-pointer absolute right-[5%]' onClick={()=>setShow(prev => !prev)}/>}
-                  <button className='w-[100%] h-[50px] bg-[#6060f5] rounded-lg flex items-center justify-center mt-[20px] text-[17px] font-semibold'>{loading? <Loading/> :"Create Account"}</button>
-                  <p className='flex gap-[10px]'>You have any account? <span className='text-[#5555f6cf] text-[17px] font-semibold cursor-pointer' onClick={()=>navigate("/login")}>Login</span></p>
-            </div>
-        </form>
-    </div>
-    </div>
-  )
+
+  </div>
+);
+
 }
 
-export default Registration
+export default Registration;
