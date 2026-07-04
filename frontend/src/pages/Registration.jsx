@@ -6,7 +6,10 @@ import { IoEyeOutline, IoEye } from "react-icons/io5";
 import { authDataContext } from "../context/AuthContext";
 import { userDataContext } from "../context/UserContext";
 import axios from "axios";
-import { signInWithPopup } from "firebase/auth";
+import {
+  signInWithPopup,
+  signInWithRedirect,
+} from "firebase/auth";
 import { auth, provider } from "../../utils/Firebase";
 import { toast } from "react-toastify";
 import Loading from "../component/Loading";
@@ -46,38 +49,46 @@ function Registration() {
     return () => clearInterval(interval);
   }, [otpSent, timer]);
 
-  const sendOTP = async () => {
-    if (!name || !email || !password) {
-      return toast.error("Please fill all fields.");
-    }
+const sendOTP = async () => {
+  console.log("1. sendOTP started");
 
-    try {
-      setSendingOtp(true);
+  if (!name || !email || !password) {
+    return toast.error("Please fill all fields.");
+  }
 
-      const result = await axios.post(
-        `${serverUrl}/api/auth/sendotp`,
-        {
-          name,
-          email,
-          password,
-        }
-      );
+  try {
+    setSendingOtp(true);
+    console.log("Server URL:", serverUrl);
 
-      toast.success(result.data.message);
+    console.log("2. Sending request...");
 
-      setOtpSent(true);
+    const result = await axios.post(
+      `${serverUrl}/api/auth/sendotp`,
+      {
+        name,
+        email,
+        password,
+      },
+      {
+        withCredentials: true,
+      }
+    );
 
-      setTimer(60);
-    } catch (error) {
-      console.log(error);
+    console.log("3. Response:", result);
 
-      toast.error(
-        error.response?.data?.message || "Failed to send OTP."
-      );
-    } finally {
-      setSendingOtp(false);
-    }
-  };
+    toast.success(result.data.message);
+
+    setOtpSent(true);
+    setTimer(60);
+  } catch (error) {
+    console.log("4. Error:", error);
+
+    toast.error(error.response?.data?.message || "Failed to send OTP.");
+  } finally {
+    console.log("5. Finished");
+    setSendingOtp(false);
+  }
+};
 
   const verifyOTP = async (e) => {
     e.preventDefault();
@@ -123,41 +134,50 @@ function Registration() {
     sendOTP();
   };
 
-  const googleSignup = async () => {
-    try {
-      setLoading(true);
+ const googleSignup = async () => {
+  try {
+    setLoading(true);
 
-      const response = await signInWithPopup(auth, provider);
+    let response;
 
-      const user = response.user;
-
-      await axios.post(
-        `${serverUrl}/api/auth/googlelogin`,
-        {
-          name: user.displayName,
-          email: user.email,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-
-      toast.success("Registration Successful");
-
-      await getCurrentUser();
-
-      navigate("/");
-    } catch (error) {
-      console.log(error);
-
-      toast.error(
-        error.response?.data?.message ||
-          "Google Registration Failed"
-      );
-    } finally {
-      setLoading(false);
+    // Mobile
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      await signInWithRedirect(auth, provider);
+      return;
     }
-  };
+
+    // Desktop
+    response = await signInWithPopup(auth, provider);
+
+    const user = response.user;
+
+    await axios.post(
+      `${serverUrl}/api/auth/googlelogin`,
+      {
+        name: user.displayName,
+        email: user.email,
+      },
+      {
+        withCredentials: true,
+      }
+    );
+
+    toast.success("Registration Successful");
+
+    await getCurrentUser();
+
+    navigate("/");
+  } catch (error) {
+    console.error(error);
+
+    toast.error(
+      error.response?.data?.message ||
+      "Google Registration Failed"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
   
   return (
   <div className="w-full min-h-screen bg-gradient-to-l from-[#141414] to-[#0c2025] flex flex-col items-center text-white py-6 px-4">
