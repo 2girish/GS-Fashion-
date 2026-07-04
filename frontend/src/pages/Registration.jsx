@@ -268,17 +268,16 @@ const sendOTP = async () => {
 
         {
           !otpSent &&
-
-          <button
-            type="button"
-            onClick={sendOTP}
-            disabled={sendingOtp}
-            className="w-full h-12 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold"
-          >
-            {
-              sendingOtp ? <Loading /> : "Send OTP"
-            }
-          </button>
+<button
+  type="button"
+  onClick={() => {
+    console.log("BUTTON CLICKED");
+    sendOTP();
+  }}
+  className="w-full h-12 bg-blue-600 rounded-lg"
+>
+  Send OTP
+</button>
         }
 
         {/* OTP */}
