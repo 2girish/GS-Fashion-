@@ -68,7 +68,8 @@ function Login() {
     let response;
 
     if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      await signInWithRedirect(auth, provider);
+     setLoading(true);
+await signInWithRedirect(auth, provider);
       return;
     } else {
       response = await signInWithPopup(auth, provider);
@@ -106,7 +107,7 @@ useEffect(() => {
 
       const user = result.user;
 
-      await axios.post(
+      const res = await axios.post(
         `${serverUrl}/api/auth/googlelogin`,
         {
           name: user.displayName,
@@ -117,19 +118,23 @@ useEffect(() => {
         }
       );
 
-      toast.success("Google Login Successful");
+      if (res.data) {
+        await getCurrentUser();
+        toast.success("Google Login Successful");
+        navigate("/");
+      }
 
-      await getCurrentUser();
-
-      navigate("/");
     } catch (error) {
-      console.error(error);
+      console.error("Redirect Login Error:", error);
       toast.error("Google Login Failed");
     }
   };
 
-  handleRedirectResult();
-}, []);
+  if (serverUrl) {
+    handleRedirectResult();
+  }
+
+}, [serverUrl, navigate, getCurrentUser]);
 
   return (
     <div className="w-[100vw] h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-white flex flex-col items-center justify-start">

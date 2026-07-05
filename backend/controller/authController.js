@@ -205,8 +205,8 @@ export const adminLogin = async (req,res) => {
 export const testMail = async (req, res) => {
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
+      from: `"GS Fashion" <${process.env.EMAIL_FROM}>`,
+to: process.env.EMAIL_FROM,
       subject: "GS Fashion Test Email",
       html: `
         <div style="font-family:Arial,sans-serif;padding:20px">
@@ -293,7 +293,7 @@ export const sendOTP = async (req, res) => {
     console.log("6. Sending email...");
 
     await transporter.sendMail({
-      from: `"GS Fashion" <${process.env.EMAIL_USER}>`,
+      from: `"GS Fashion" <${process.env.EMAIL_FROM}>`,
       to: email,
       subject: "GS Fashion - Email Verification OTP",
       html: `
@@ -493,7 +493,7 @@ export const forgotPassword = async (req, res) => {
 
     // Send Email
     await transporter.sendMail({
-      from: `"GS Fashion" <${process.env.EMAIL_USER}>`,
+      from: `"GS Fashion" <${process.env.EMAIL_FROM}>`,
       to: email,
       subject: "GS Fashion - Password Reset OTP",
       html: `

@@ -14,7 +14,7 @@ try {
   console.log("✅ SMTP Connected Successfully!");
 
   const info = await transporter.sendMail({
-    from: `"GS Fashion" <${process.env.EMAIL_USER}>`,
+    from: `"GS Fashion" <${process.env.EMAIL_FROM}>`,
     to: process.env.EMAIL_USER,
     subject: "GS Fashion Test Email",
     text: "This is a test email from GS Fashion.",
