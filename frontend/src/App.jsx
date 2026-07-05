@@ -16,6 +16,7 @@ import Order from './pages/Order'
 import { ToastContainer } from 'react-toastify'
 import NotFound from './pages/NotFound'
 import Ai from './component/Ai'
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   const { userData } = useContext(userDataContext)
@@ -107,6 +108,7 @@ function App() {
             )
           }
         />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
     
         <Route path="*" element={<NotFound />} />

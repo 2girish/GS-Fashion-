@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Logo from "../assets/gs1.jpeg";
 import google from "../assets/google.png";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +6,11 @@ import { IoEyeOutline, IoEye } from "react-icons/io5";
 import { authDataContext } from "../context/AuthContext";
 import { userDataContext } from "../context/UserContext";
 import axios from "axios";
-import { signInWithPopup, signInWithRedirect } from "firebase/auth";
+import {
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+} from "firebase/auth";
 import { auth, provider } from "../../utils/Firebase";
 import Loading from "../component/Loading";
 import { toast } from "react-toastify";
@@ -93,6 +97,39 @@ function Login() {
     setLoading(false);
   }
 };
+useEffect(() => {
+  const handleRedirectResult = async () => {
+    try {
+      const result = await getRedirectResult(auth);
+
+      if (!result) return;
+
+      const user = result.user;
+
+      await axios.post(
+        `${serverUrl}/api/auth/googlelogin`,
+        {
+          name: user.displayName,
+          email: user.email,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      toast.success("Google Login Successful");
+
+      await getCurrentUser();
+
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      toast.error("Google Login Failed");
+    }
+  };
+
+  handleRedirectResult();
+}, []);
 
   return (
     <div className="w-[100vw] h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-white flex flex-col items-center justify-start">
@@ -160,6 +197,12 @@ function Login() {
                 onClick={() => setShow(false)}
               />
             )}
+            <p
+  className="w-full text-right text-blue-400 cursor-pointer hover:underline"
+  onClick={() => navigate("/forgot-password")}
+>
+  Forgot Password?
+</p>
 
             <button
               type="submit"

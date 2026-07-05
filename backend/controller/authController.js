@@ -236,23 +236,30 @@ export const testMail = async (req, res) => {
 
 export const sendOTP = async (req, res) => {
   try {
-const { name, email, password } = req.body;
+    console.log("========== SEND OTP START ==========");
 
-if (!name || !email || !password) {
-  return res.status(400).json({
-    success: false,
-    message: "All fields are required.",
-  });
-}
-if (!validator.isEmail(email)) {
-  return res.status(400).json({
-    success: false,
-    message: "Please enter a valid email.",
-  });
-}
+    const { name, email, password } = req.body;
+    console.log("1. Request Data:", { name, email });
 
-const hashPassword = await bcrypt.hash(password, 10);
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required.",
+      });
+    }
 
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email.",
+      });
+    }
+
+    console.log("2. Hashing password...");
+    const hashPassword = await bcrypt.hash(password, 10);
+    console.log("✔ Password hashed");
+
+    console.log("3. Checking existing user...");
     const existingUser = await User.findOne({
       email: email.toLowerCase(),
     });
@@ -263,20 +270,27 @@ const hashPassword = await bcrypt.hash(password, 10);
         message: "Email already registered.",
       });
     }
+    console.log("✔ User does not exist");
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-// Delete previous OTP if it exists
-await OTP.deleteOne({ email: email.toLowerCase() });
+    console.log("4. Deleting previous OTP...");
+    await OTP.deleteOne({
+      email: email.toLowerCase(),
+    });
+    console.log("✔ Previous OTP deleted");
 
-// Save new OTP
-await OTP.create({
-  name,
-  email: email.toLowerCase(),
-  password:hashPassword,// We'll store the password in the next step
-  otp,
-  otpExpiry: new Date(Date.now() + 5 * 60 * 1000),
-});
+    console.log("5. Saving OTP...");
+    await OTP.create({
+      name,
+      email: email.toLowerCase(),
+      password: hashPassword,
+      otp,
+      otpExpiry: new Date(Date.now() + 5 * 60 * 1000),
+    });
+    console.log("✔ OTP saved");
+
+    console.log("6. Sending email...");
 
     await transporter.sendMail({
       from: `"GS Fashion" <${process.env.EMAIL_USER}>`,
@@ -315,18 +329,23 @@ await OTP.create({
           <p style="text-align:center;color:gray;">
             © 2026 GS Fashion
           </p>
-
         </div>
       </div>
       `,
     });
 
+    console.log("✔ Email sent successfully");
+    console.log("========== SEND OTP SUCCESS ==========");
+
     return res.status(200).json({
       success: true,
       message: "OTP sent successfully.",
     });
+
   } catch (error) {
-    console.log(error);
+    console.error("========== SEND OTP ERROR ==========");
+    console.error(error);
+    console.error(error.stack);
 
     return res.status(500).json({
       success: false,
@@ -417,6 +436,222 @@ export const verifyOTP = async (req, res) => {
       success: true,
       message: "Registration Successful",
       user,
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    let { email } = req.body;
+
+    email = email?.trim().toLowerCase();
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter your email.",
+      });
+    }
+
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email.",
+      });
+    }
+
+    // Check user exists
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Email not registered.",
+      });
+    }
+
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Remove previous OTP
+    await OTP.deleteOne({ email });
+
+    // Save new OTP
+    await OTP.create({
+      email,
+      otp,
+      otpExpiry: new Date(Date.now() + 5 * 60 * 1000),
+    });
+
+    // Send Email
+    await transporter.sendMail({
+      from: `"GS Fashion" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "GS Fashion - Password Reset OTP",
+      html: `
+      <div style="font-family:Arial;padding:30px;background:#f4f6f9">
+        <div style="max-width:600px;margin:auto;background:#fff;border-radius:15px;padding:40px">
+
+          <h1 style="text-align:center;color:#111827;">
+            🛍 GS Fashion
+          </h1>
+
+          <h2>Password Reset</h2>
+
+          <p>You requested to reset your password.</p>
+
+          <p>Use the OTP below:</p>
+
+          <div style="
+            margin:30px auto;
+            width:220px;
+            text-align:center;
+            font-size:36px;
+            font-weight:bold;
+            letter-spacing:10px;
+            background:#2563eb;
+            color:white;
+            padding:20px;
+            border-radius:12px;
+          ">
+            ${otp}
+          </div>
+
+          <p>This OTP is valid for <b>5 minutes</b>.</p>
+
+          <p>If you didn't request this, simply ignore this email.</p>
+
+          <hr>
+
+          <p style="text-align:center;color:gray;">
+            © 2026 GS Fashion
+          </p>
+
+        </div>
+      </div>
+      `,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully.",
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+export const verifyForgotOTP = async (req, res) => {
+  try {
+    let { email, otp } = req.body;
+
+    email = email?.trim().toLowerCase();
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required.",
+      });
+    }
+
+    const otpData = await OTP.findOne({ email });
+
+    if (!otpData) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP not found. Please request a new OTP.",
+      });
+    }
+
+    // Check OTP Expiry
+ console.log("Current Time :", new Date());
+console.log("OTP Expiry   :", otpData.otpExpiry);
+
+if (otpData.otpExpiry < new Date()) {
+      await OTP.deleteOne({ email });
+
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired.",
+      });
+    }
+
+    // Check OTP
+    if (otpData.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+export const resetPassword = async (req, res) => {
+  try {
+    let { email, password } = req.body;
+
+    email = email?.trim().toLowerCase();
+    password = password?.trim();
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required.",
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters.",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    await User.findByIdAndUpdate(user._id, {
+      password: hashPassword,
+    });
+
+    await OTP.deleteOne({ email });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully.",
     });
 
   } catch (error) {
