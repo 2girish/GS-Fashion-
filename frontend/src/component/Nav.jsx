@@ -1,5 +1,8 @@
+
 import React, { useContext, useState } from 'react'
 import logo from '../assets/gs1.jpeg'
+import { signOut } from "firebase/auth";
+import { auth } from "../../utils/Firebase";
 import { IoSearchCircleOutline } from "react-icons/io5";
 import { FaCircleUser } from "react-icons/fa6";
 import { MdOutlineShoppingCart } from "react-icons/md";

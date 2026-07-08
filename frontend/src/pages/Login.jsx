@@ -26,40 +26,32 @@ function Login() {
   const { serverUrl } = useContext(authDataContext);
   const { getCurrentUser } = useContext(userDataContext);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    setLoading(true);
-
-    try {
-      const result = await axios.post(
-        `${serverUrl}/api/auth/login`,
-        {
-          email,
-          password,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-
-      toast.success(result.data.message || "Login Successful");
-
-      await getCurrentUser();
-
-      navigate("/");
-    } catch (error) {
-      console.log(error);
-
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("Server Error");
+ const handleLogout = async () => {
+  try {
+    // Logout from backend
+    await axios.get(
+      `${serverUrl}/api/auth/logout`,
+      {
+        withCredentials: true,
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    );
+
+    // Logout from Firebase
+    await signOut(auth);
+
+    // Clear frontend user
+    setUserData(null);
+
+    setShowProfile(false);
+
+    toast.success("Logged out successfully");
+
+    navigate("/login");
+  } catch (error) {
+    console.log(error);
+    toast.error("Logout Failed");
+  }
+};
 
 const googlelogin = async () => {
   try {
