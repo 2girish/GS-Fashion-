@@ -4,7 +4,7 @@ import validator from "validator"
 import bcrypt from "bcryptjs"
 import { genToken, genToken1 } from "../config/token.js";
 import OTP from "../model/otpModel.js";
-
+import { sendBrevoMail } from "../utils/brevoMail.js";
 export const registration = async (req, res) => {
     try {
         let { name, email, password } = req.body;
@@ -292,11 +292,10 @@ export const sendOTP = async (req, res) => {
 
     console.log("6. Sending email...");
 
-    await transporter.sendMail({
-      from: `"GS Fashion" <${process.env.EMAIL_FROM}>`,
-      to: email,
-      subject: "GS Fashion - Email Verification OTP",
-      html: `
+    await sendBrevoMail({
+  to: email,
+  subject: "GS Fashion - Email Verification OTP",
+  html: `
       <div style="font-family:Arial;padding:30px;background:#f4f6f9">
         <div style="max-width:600px;margin:auto;background:#fff;border-radius:15px;padding:40px">
           <h1 style="text-align:center;color:#111827;">🛍 GS Fashion</h1>
@@ -331,8 +330,8 @@ export const sendOTP = async (req, res) => {
           </p>
         </div>
       </div>
-      `,
-    });
+  `,
+});
 
     console.log("✔ Email sent successfully");
     console.log("========== SEND OTP SUCCESS ==========");
