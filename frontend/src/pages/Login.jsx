@@ -9,7 +9,7 @@ import axios from "axios";
 import {
   signInWithPopup,
   signInWithRedirect,
-  getRedirectResult,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { auth, provider } from "../../utils/Firebase";
 import Loading from "../component/Loading";
@@ -99,14 +99,10 @@ await signInWithRedirect(auth, provider);
   }
 };
 useEffect(() => {
-  const handleRedirectResult = async () => {
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+
     try {
-      const result = await getRedirectResult(auth);
-
-      if (!result) return;
-
-      const user = result.user;
-
       const res = await axios.post(
         `${serverUrl}/api/auth/googlelogin`,
         {
@@ -123,17 +119,13 @@ useEffect(() => {
         toast.success("Google Login Successful");
         navigate("/");
       }
-
     } catch (error) {
-      console.error("Redirect Login Error:", error);
+      console.error(error);
       toast.error("Google Login Failed");
     }
-  };
+  });
 
-  if (serverUrl) {
-    handleRedirectResult();
-  }
-
+  return () => unsubscribe();
 }, [serverUrl, navigate, getCurrentUser]);
 
   return (
