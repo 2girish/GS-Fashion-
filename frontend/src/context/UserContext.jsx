@@ -21,9 +21,11 @@ function UserContext({children}) {
         }
     }
 
-    useEffect(()=>{
-     getCurrentUser()
-    },[])
+  useEffect(() => {
+  if (serverUrl) {
+    getCurrentUser();
+  }
+}, [serverUrl]);
 
 
 

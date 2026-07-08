@@ -61,23 +61,24 @@ function Login() {
     }
   };
 
- const googlelogin = async () => {
+const googlelogin = async () => {
   try {
     setLoading(true);
 
-    let response;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(
+      navigator.userAgent
+    );
 
-    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-     setLoading(true);
-await signInWithRedirect(auth, provider);
+    if (isMobile) {
+      await signInWithRedirect(auth, provider);
       return;
-    } else {
-      response = await signInWithPopup(auth, provider);
     }
+
+    const response = await signInWithPopup(auth, provider);
 
     const user = response.user;
 
-    await axios.post(
+    const res = await axios.post(
       `${serverUrl}/api/auth/googlelogin`,
       {
         name: user.displayName,
@@ -88,18 +89,24 @@ await signInWithRedirect(auth, provider);
       }
     );
 
-    toast.success("Google Login Successful");
-    await getCurrentUser();
-    navigate("/");
+    if (res.data) {
+      await getCurrentUser();
+      toast.success("Google Login Successful");
+      navigate("/");
+    }
   } catch (error) {
-    console.error(error);
+    console.error("Google Login Error:", error);
     toast.error("Google Login Failed");
   } finally {
     setLoading(false);
   }
 };
 useEffect(() => {
+  if (!serverUrl) return;
+
   const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    console.log("Firebase User:", user);
+
     if (!user) return;
 
     try {
@@ -120,8 +127,7 @@ useEffect(() => {
         navigate("/");
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Google Login Failed");
+      console.error("Redirect Google Login Error:", error);
     }
   });
 
