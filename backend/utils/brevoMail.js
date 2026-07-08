@@ -1,35 +1,36 @@
-import Brevo from "@getbrevo/brevo";
+import axios from "axios";
 
-const apiInstance = new Brevo.TransactionalEmailsApi();
-
-apiInstance.setApiKey(
-  Brevo.TransactionalEmailsApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY
-);
-
-export const sendBrevoMail = async ({
-  to,
-  subject,
-  html,
-}) => {
+export const sendBrevoMail = async ({ to, subject, html }) => {
   try {
-    await apiInstance.sendTransacEmail({
-      sender: {
-        name: "GS Fashion",
-        email: process.env.EMAIL_FROM,
-      },
-      to: [
-        {
-          email: to,
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "GS Fashion",
+          email: process.env.EMAIL_FROM,
         },
-      ],
-      subject,
-      htmlContent: html,
-    });
+        to: [
+          {
+            email: to,
+          },
+        ],
+        subject,
+        htmlContent: html,
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    console.log("✅ Brevo email sent successfully");
+    console.log("✅ Brevo email sent:", response.data);
   } catch (error) {
-    console.error("Brevo Email Error:", error);
+    console.error(
+      "Brevo API Error:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
