@@ -9,7 +9,7 @@ import axios from "axios";
 import {
   signInWithPopup,
   signInWithRedirect,
-  onAuthStateChanged,
+  getRedirectResult,
 } from "firebase/auth";
 import { auth, provider } from "../../utils/Firebase";
 import Loading from "../component/Loading";
@@ -99,14 +99,14 @@ const googlelogin = async () => {
   }
 };
 useEffect(() => {
-  if (!serverUrl) return;
-
-  const unsubscribe = onAuthStateChanged(auth, async (user) => {
-    console.log("Firebase User:", user);
-
-    if (!user) return;
-
+  const handleRedirectResult = async () => {
     try {
+      const result = await getRedirectResult(auth);
+
+      if (!result) return;
+
+      const user = result.user;
+
       const res = await axios.post(
         `${serverUrl}/api/auth/googlelogin`,
         {
@@ -124,13 +124,14 @@ useEffect(() => {
         navigate("/");
       }
     } catch (error) {
-      console.error("Redirect Google Login Error:", error);
+      console.error("Redirect Login Error:", error);
     }
-  });
+  };
 
-  return () => unsubscribe();
+  if (serverUrl) {
+    handleRedirectResult();
+  }
 }, [serverUrl, navigate, getCurrentUser]);
-
   return (
     <div className="w-[100vw] h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-white flex flex-col items-center justify-start">
       <div
