@@ -74,12 +74,23 @@ function ShopContext({children}) {
 
 
     const getUserCart = async () => {
-      try {
-        const result = await axios.post(serverUrl + '/api/cart/get',{},{ withCredentials: true })
+  try {
+    const result = await axios.post(
+      `${serverUrl}/api/cart/get`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
 
-      setCartItem(result.data)
-    } catch (error) {
-      console.log(error)
+    setCartItem(result.data);
+  } catch (error) {
+    if (error.response?.status === 400) {
+      setCartItem({});
+      return;
+    }
+
+    console.error(error);
      
 
 
@@ -139,9 +150,13 @@ function ShopContext({children}) {
      getProducts()
     },[])
 
-    useEffect(() => {
-    getUserCart()
-  },[])
+   useEffect(() => {
+  if (userData) {
+    getUserCart();
+  } else {
+    setCartItem({});
+  }
+}, [userData]);
 
 
 

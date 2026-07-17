@@ -21,11 +21,27 @@ function UserContext({children}) {
         }
     }
 
-  useEffect(() => {
-  if (serverUrl) {
-    getCurrentUser();
+const getCurrentUser = async () => {
+  try {
+    const result = await axios.get(
+      `${serverUrl}/api/user/getcurrentuser`,
+      {
+        withCredentials: true,
+      }
+    );
+
+    setUserData(result.data);
+  } catch (error) {
+    // No login cookie → user is simply not logged in
+    if (error.response?.status === 400) {
+      setUserData(null);
+      return;
+    }
+
+    console.error(error);
+    setUserData(null);
   }
-}, [serverUrl]);
+};
 
 
 
