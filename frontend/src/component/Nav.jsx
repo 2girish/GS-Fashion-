@@ -23,21 +23,27 @@ function Nav() {
     let navigate = useNavigate()
 
 const handleLogout = async () => {
-    try {
-        await axios.get(
-            serverUrl + "/api/auth/logout",
-            { withCredentials: true }
-        );
+  try {
+    // Logout from backend
+    await axios.get(`${serverUrl}/api/auth/logout`, {
+      withCredentials: true,
+    });
 
-        await getCurrentUser();
+    // Logout from Firebase
+    await signOut(auth);
 
-        setShowProfile(false);
+    // Clear frontend user
+    setUserData(null);
 
-        navigate("/login");
+    setShowProfile(false);
 
-    } catch (error) {
-        console.log(error);
-    }
+    toast.success("Logged out successfully");
+
+    navigate("/login");
+  } catch (error) {
+    console.error(error);
+    toast.error("Logout Failed");
+  }
 };
   return (
     <div className='w-[100vw] h-[70px] bg-[#ecfafaec] z-10 fixed top-0 flex  items-center justify-between px-[10px] shadow-md shadow-black '>
